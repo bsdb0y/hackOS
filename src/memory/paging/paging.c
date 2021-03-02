@@ -46,3 +46,22 @@ int paging_get_indexes(void* virtual_addr, uint32_t* directory_index, uint32_t* 
 out:
     return ret;
 }
+
+int paging_set(uint32_t* directory, void* virt, uint32_t val) {
+    if(!is_paging_aligned(virt)) {
+        return -EINVARG;
+    }
+
+    uint32_t directory_index = 0;
+    uint32_t table_index = 0;
+    int ret = 0;
+    ret = paging_get_indexes(virt, &directory_index, &table_index);
+    if (ret < 0) {
+        return ret;
+    }
+
+    uint32_t page_directory_entry = directory[directory_index];
+    uint32_t* page_table = (uint32_t*)(page_directory_entry & 0xffff0000); //ignoring the last 12 bits here.
+    page_table[table_index] = val;
+    return ret;
+}

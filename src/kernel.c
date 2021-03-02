@@ -77,9 +77,23 @@ void kernel_main() {
     kernel_chunk = paging_new_4GB(PAGING_IS_WRITABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
 
     //Switch to kernel chunk paging
+    //uint32_t* dir = paging_4GB_chunk_get_directory(kernel_chunk);
     paging_switch(paging_4GB_chunk_get_directory(kernel_chunk));
+
+    char *ptr = kzalloc(4096);
+    int ret = paging_set(paging_4GB_chunk_get_directory(kernel_chunk), (void*)0x1000, (uint32_t)ptr | PAGING_ACCESS_FROM_ALL | PAGING_IS_PRESENT | PAGING_IS_WRITABLE);
+    if (ret < 0) {
+        print_kern("paging_set() failed\n");
+    }
     //enable paging
     enable_paging();
+
+    //TODO: below code failing as ptr not reflecting the ptr1 data
+    char* ptr1 = (char*)0x1000;
+    ptr1[0] = 'A';
+    ptr1[1] = 'B';
+    print_kern(ptr1);
+    print_kern(ptr);
 
     //Enable interrupts: enable interrupts is below than enable paging because paging can cause interrupts 
     enable_interrupts();
