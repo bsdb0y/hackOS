@@ -73,22 +73,14 @@ void kernel_main() {
     //Initialize the IDT
     idt_init();
 
-    //Enable interrupts
-    enable_interrupts();
-
-    //Setup paging
+    //Setup paging: Linear Paging: 0x00 points to 0x00 Physical mem and 0x1000 points to 0x1000 Physical mem and so on...
     kernel_chunk = paging_new_4GB(PAGING_IS_WRITABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
 
     //Switch to kernel chunk paging
     paging_switch(paging_4GB_chunk_get_directory(kernel_chunk));
     //enable paging
     enable_paging();
-    // void* ptr = kmalloc(50);
-    // void* ptr1 = kmalloc(5000);
-    // kfree(ptr);
-    // void* ptr2 = kmalloc(50);
 
-    // if (ptr || ptr1 || ptr2) {
-          
-    // }
+    //Enable interrupts: enable interrupts is below than enable paging because paging can cause interrupts 
+    enable_interrupts();
 }
