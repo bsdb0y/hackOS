@@ -40,8 +40,8 @@ int paging_get_indexes(void* virtual_addr, uint32_t* directory_index, uint32_t* 
         ret = -EINVARG;
         goto out;
     }
-    *directory_index = (uint32_t)virtual_addr / (PAGING_TOTAL_ENTRIES_PER_TABLE * PAGE_SIZE);
-    *table_index = (uint32_t)virtual_addr % (PAGING_TOTAL_ENTRIES_PER_TABLE * PAGE_SIZE) / PAGE_SIZE;
+    *directory_index = ((uint32_t)virtual_addr / (PAGING_TOTAL_ENTRIES_PER_TABLE * PAGE_SIZE));
+    *table_index = ((uint32_t)virtual_addr % (PAGING_TOTAL_ENTRIES_PER_TABLE * PAGE_SIZE) / PAGE_SIZE);
 
 out:
     return ret;
@@ -54,14 +54,13 @@ int paging_set(uint32_t* directory, void* virt, uint32_t val) {
 
     uint32_t directory_index = 0;
     uint32_t table_index = 0;
-    int ret = 0;
-    ret = paging_get_indexes(virt, &directory_index, &table_index);
+    int ret = paging_get_indexes(virt, &directory_index, &table_index);
     if (ret < 0) {
         return ret;
     }
 
     uint32_t page_directory_entry = directory[directory_index];
-    uint32_t* page_table = (uint32_t*)(page_directory_entry & 0xffff0000); //ignoring the last 12 bits here.
+    uint32_t* page_table = (uint32_t*)(page_directory_entry & 0xfffff000); //ignoring the last 12 bits here.
     page_table[table_index] = val;
     return ret;
 }
